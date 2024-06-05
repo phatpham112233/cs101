@@ -1,53 +1,37 @@
-import os
-import subprocess
-import platform
+import math
+import random
 
-def check_ssh_key():
-    ssh_key_path = os.path.expanduser("~/.ssh/id_ed25519.pub")
-    return os.path.isfile(ssh_key_path)
+def result_value():
+    num_sample = input("input number of sapmples and it's must be interger: ")
+    if not num_sample.isnumeric():
+        print("sample must be an interger")
+        return
+    loss_name = input("Please input loss name (MAE, MSE, RMSE): ")
+    num_sample = int(num_sample)
 
-def generate_ssh_key(email):
-    cmd = f'ssh-keygen -t ed25519 -C "{email}" -f ~/.ssh/id_ed25519 -N ""'
-    subprocess.run(cmd, shell=True, check=True)
-    print("SSH key generated successfully.")
+    total_loss = 0
 
-def start_ssh_agent():
-    if platform.system() == "Windows":
-        cmd = 'start-ssh-agent.cmd'
-    else:
-        cmd = 'eval "$(ssh-agent -s)"'
-    subprocess.run(cmd, shell=True, check=True)
-    print("SSH agent started.")
-
-def add_ssh_key_to_agent():
-    cmd = 'ssh-add ~/.ssh/id_ed25519'
-    subprocess.run(cmd, shell=True, check=True)
-    print("SSH key added to SSH agent.")
-
-def get_ssh_key():
-    with open(os.path.expanduser("~/.ssh/id_ed25519.pub"), 'r') as file:
-        return file.read().strip()
-
-def main():
-    email = input("Enter your GitHub email address: ")
+    for i in range(num_sample):
+        pred = random.uniform(0, 10)
+        target = random.uniform(0, 10)
     
-    if check_ssh_key():
-        print("An existing SSH key was found.")
-    else:
-        print("No existing SSH key found. Generating a new one.")
-        generate_ssh_key(email)
+        if loss_name == "MAE":
+            loss = abs(pred - target)
+        elif loss_name == "MSE":
+            loss = (pred - target) ** 2
+        elif loss_name == "RMSE":
+            loss = (pred - target) ** 2
+        else:
+            print(f"{loss_name} is not supported.")
+            return
+        total_loss += loss
+        print(f"loss name: {loss_name}, sample: {i}, predict: {pred}, target: {target}, loss: {loss}")
+    if loss_name == "MAE":
+        final_loss = total_loss / num_sample
+    elif loss_name == "MSE":
+        final_loss = total_loss / num_sample
+    elif loss_name == "RMSE":
+        final_loss = math.sqrt(total_loss / num_sample)
+    print(f"finale {loss_name}: {final_loss}")
     
-    start_ssh_agent()
-    add_ssh_key_to_agent()
-    
-    ssh_key = get_ssh_key()
-    print("\nCopy the following SSH key and add it to your GitHub account:")
-    print(ssh_key)
-    print("\nTo add the SSH key to your GitHub account:")
-    print("1. Log in to GitHub.")
-    print("2. Go to Settings > SSH and GPG keys.")
-    print("3. Click 'New SSH key', give it a title, and paste the SSH key.")
-    print("4. Click 'Add SSH key'.")
-
-if __name__ == "__main__":
-    main()
+result_value()
